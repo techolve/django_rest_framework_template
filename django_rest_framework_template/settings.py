@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import environ
 from pathlib import Path
+from import_export.formats.base_formats import XLSX, CSV, JSON, YAML
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +34,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS')
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS')
 
 # Application definition
 
@@ -44,8 +46,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'django_extensions',
     'rest_framework',
+    'drf_spectacular',
+    'import_export',
+    'django_filters',
+    'import_export',
     'user',
 ]
 
@@ -135,7 +142,50 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int('PAGE_SIZE', default=10),
     # <<< ページネーション設定
+    # Simple JWT設定 >>>
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    # カスタム例外ハンドラ設定
+    "EXCEPTION_HANDLER": "django_rest_framework_template.exceptions.custom_exception_handler",
+    # <<< Simple JWT設定
+    # drf-spectacular設定
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # drf-spectacular設定
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # JSONキャメルケース対応 >>>
+    'DEFAULT_RENDERER_CLASSES': (
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'djangorestframework_camel_case.parser.CamelCaseFormParser',
+        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
+    ),
+    # <<< JSONキャメルケース対応
+    # テスト設定 >>>
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.TemplateHTMLRenderer',
+    ),
+    # <<< テスト設定
+}
+
+# drf-spectacular設定
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Django REST Framework Template API',
+    'DESCRIPTION': 'Django REST Framework TemplateのAPIドキュメントです。',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 # カスタムユーザーモデルの設定
 AUTH_USER_MODEL = 'user.User'
+
+
+# import-export設定
+IMPORT_EXPORT_FORMATS=[XLSX, CSV, JSON, YAML]
+
