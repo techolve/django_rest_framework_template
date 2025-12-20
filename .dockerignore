@@ -6,3 +6,6 @@ postgres_data/
 
 # ログファイル
 *.log
+
+# ドキュメントファイル
+docs/
